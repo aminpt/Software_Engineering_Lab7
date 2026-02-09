@@ -1,53 +1,35 @@
 package edu.ticket;
 
+import edu.ticket.state.TicketState;
+import edu.ticket.state.OrderedState;
+import edu.ticket.strategy.TravelStrategy;
+
 public class TicketService {
+    private TravelStrategy travelStrategy;
+    private TicketState currentState;
 
-    private String state = "NEW";
+    public TicketService(TravelStrategy travelStrategy) {
+        this.travelStrategy = travelStrategy;
+        this.currentState = new OrderedState();
+    }
 
-    public void handle(String channel, String type) {
+    public void setState(TicketState state) {
+        this.currentState = state;
+    }
 
-        if (state.equals("NEW")) {
-            System.out.println("Ticket created");
+    public void buy() {
+        currentState.pay(this);
+    }
 
-            if (channel.equals("WEB")) {
-                System.out.println("Received from web");
-            } else if (channel.equals("EMAIL")) {
-                System.out.println("Received from email");
-            }
+    public void cancel() {
+        currentState.cancel(this);
+    }
 
-            state = "ASSIGNED";
-        }
+    public double getPrice() {
+        return travelStrategy.calculatePrice();
+    }
 
-        if (state.equals("ASSIGNED")) {
-            if (type.equals("BUG")) {
-                System.out.println("Assigned to engineering");
-            } else {
-                System.out.println("Assigned to support");
-            }
-            state = "IN_PROGRESS";
-        }
-
-        if (state.equals("IN_PROGRESS")) {
-            System.out.println("Working on ticket");
-
-            if (type.equals("BUG")) {
-                System.out.println("Sending bug response");
-            } else {
-                System.out.println("Sending generic response");
-            }
-
-            state = "RESOLVED";
-        }
-
-        if (state.equals("RESOLVED")) {
-            System.out.println("Ticket resolved");
-            state = "CLOSED";
-        }
-
-        if (state.equals("CLOSED")) {
-            System.out.println("Ticket closed");
-        }
-
-        System.out.println("Logging ticket handling");
+    public String getDescription() {
+        return travelStrategy.getDescription();
     }
 }
